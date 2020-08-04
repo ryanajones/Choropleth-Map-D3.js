@@ -1,42 +1,83 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
+document.addEventListener('DOMContentLoaded', () => getData());
 
-const w = 1200;
-const h = 730;
-const padding = 60;
+// get json data using async await
+const getData = async () => {
+  const responseEducation = await fetch(
+    'https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/for_user_education.json'
+  );
+  const dataEducation = await responseEducation.json();
+  const responseCounty = await fetch(
+    'https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/counties.json'
+  );
+  const dataCounty = await responseCounty.json();
+  drawChart(dataEducation, dataCounty);
+};
 
-const svg = d3.select('.main').append('svg').attr('width', w).attr('height', h);
-const g = svg.append('g').attr('class', 'counties');
+const drawChart = (educationStatistics, useMap) => {
+  const w = 1200;
+  const h = 730;
+  const padding = 60;
 
-const albersProjection = d3
-  .geoAlbers()
-  .scale(190000)
-  .rotate([71.057, 0])
-  .center([0, 42.313])
-  .translate([w / 2, h / 2]);
+  const [minBachelorOrHigher, maxBachelorOrHigher] = [
+    ...d3.extent(educationStatistics.map((el) => el.bachelorsOrHigher)),
+  ];
 
-const geoPath = d3.geoPath().projection(albersProjection);
+  const colorQuantity = 8;
 
-const EDUCATION_FILE =
-  'https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/for_user_education.json';
-const COUNTY_FILE =
-  'https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/counties.json';
+  // define color scale
+  const scaleColors = d3
+    .scaleThreshold()
+    .domain(
+      d3
+        .range(colorQuantity)
+        .map(
+          (el) =>
+            el * ((maxBachelorOrHigher - minBachelorOrHigher) / colorQuantity) +
+            minBachelorOrHigher
+        )
+    )
+    .range(d3.schemePurples[colorQuantity]);
 
-const files = [EDUCATION_FILE, COUNTY_FILE];
-const promises = [];
+  // map the fips with their county values
+  const fipsCountiesMap = d3.map();
+  educationStatistics.map((v) =>
+    fipsCountiesMap.set(v.fips, {
+      areaName: v.area_name,
+      bachelorsOrHigher: v.bachelorsOrHigher,
+      state: v.state,
+    })
+  );
 
-files.forEach(function (url) {
-  promises.push(d3.json(url));
-});
+  console.log(fipsCountiesMap);
 
-Promise.all(promises).then(function (data) {
+  // draw the choropleth map
+  const svg = d3
+    .select('.main')
+    .append('svg')
+    .attr('width', w)
+    .attr('height', h);
+
+  const g = svg.append('g').attr('class', 'counties');
+
+  const geoPath = d3.geoPath();
+
   g.selectAll('path')
-    .data(topojson.feature(data[1], data[1].objects.counties).features)
+    .data(topojson.feature(useMap, useMap.objects.counties).features)
     .enter()
     .append('path')
     .attr('class', 'county')
-    .attr('fill', '#ccc')
-    .attr('stroke', '#333')
-    .attr('d', geoPath);
-});
+    .attr('data-fips', (d) => d.id)
+    .attr('d', geoPath)
+    .attr('data-fips', (d) => d.id)
+    .attr(
+      'data-education',
+      (d) => fipsCountiesMap.get(d.id).bachelorsOrHigher || 0
+    )
+    .attr('fill', (d) =>
+      scaleColors(fipsCountiesMap.get(d.id).bachelorsOrHigher || 0)
+    )
+    .attr('transform', 'translate(130, 60)');
+};
