@@ -105,3 +105,17 @@ h1 {
 #description {
   font-size: 0.9em;
 }
+
+.tick text {
+  font-size: 11px;
+}
+
+#tooltip {
+  position: absolute;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  color: white;
+  background-color: #232531;
+  pointer-events: none;
+}
