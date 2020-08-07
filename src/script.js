@@ -14,9 +14,16 @@ const tooltip = d3
   .attr('id', 'tooltip')
   .style('opacity', 0);
 
-const svg = d3.select('.main').append('svg').attr('width', w).attr('height', h);
+const svg = d3
+  .select('.main')
+  .append('svg')
+  .attr('width', w)
+  .attr('height', h)
+  .style('background-color', 'rgb(0, 0, 0)')
+  .style('border-bottom-right-radius', '10px')
+  .style('border-bottom-left-radius', '10px');
 
-// extract json data using async await
+// extracting json data using async await
 const getData = async () => {
   const responseEducation = await fetch(
     'https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/for_user_education.json'
@@ -34,7 +41,7 @@ const drawChart = (educationStatistics, useMap) => {
     ...d3.extent(educationStatistics.map((el) => el.bachelorsOrHigher)),
   ];
 
-  // define color scale
+  // defining color scale
   const scaleColors = d3
     .scaleThreshold()
     .domain(
@@ -46,9 +53,9 @@ const drawChart = (educationStatistics, useMap) => {
             minBachelorOrHigher
         )
     )
-    .range(d3.schemePurples[colorQuantity]);
+    .range(d3.schemeGreens[colorQuantity]);
 
-  // map the fips with their county values
+  // mapping the fips with their county values
   const fipsCountiesMap = d3.map();
   educationStatistics.map((v) =>
     fipsCountiesMap.set(v.fips, {
@@ -58,7 +65,7 @@ const drawChart = (educationStatistics, useMap) => {
     })
   );
 
-  // draw the choropleth map
+  // drawing the choropleth map
 
   const g = svg.append('g').attr('class', 'counties');
 
@@ -97,7 +104,7 @@ const drawChart = (educationStatistics, useMap) => {
       tooltip.transition().duration(200).style('opacity', 0);
     });
 
-  // define the legend
+  // defining the legend
 
   svg.append('g').attr('id', 'legend');
 
