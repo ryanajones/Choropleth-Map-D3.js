@@ -12,4 +12,4 @@ https://codepen.io/ryanajones/full/dyMPvxd
 
 ## Screenshot
 
-![alt text](https://i.imgur.com/qm4hj95.png)
+![alt text](https://i.imgur.com/Yp4nm1u.png)
