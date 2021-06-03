@@ -1,6 +1,6 @@
 # Choropleth Map D3.js
 
-This is a data visualization map of the US population which have attained a bachelor's degree or higher in college.
+> This is a data visualization map of the US population which have attained a bachelor's degree or higher in college. The D3.js library is used to take JSON data and convert it into SVG data visualizations.
 
 ## Technologies Used
 
